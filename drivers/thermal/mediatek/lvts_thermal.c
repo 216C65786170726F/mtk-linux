@@ -714,8 +714,9 @@ static int lvts_calibration_init(struct device *dev, struct lvts_ctrl *lvts_ctrl
 	u32 gt;
 
 	/* A zero value for gt means that device has invalid efuse data */
-	gt = (((u32 *)efuse_calibration)[0] >> lvts_ctrl->lvts_data->gt_calib_bit_offset) & 0xff;
+	//gt = (((u32 *)efuse_calibration)[0] >> lvts_ctrl->lvts_data->gt_calib_bit_offset) & 0xff;
 
+	gt = 0;
 	lvts_for_each_valid_sensor(i, lvts_ctrl_data) {
 		const struct lvts_sensor_data *sensor =
 					&lvts_ctrl_data->lvts_sensor[i];
@@ -1449,6 +1450,49 @@ static int lvts_resume(struct device *dev)
 	return 0;
 }
 
+
+
+static const struct lvts_ctrl_data mt6789_lvts_ap_data_ctrl[] = {
+	{
+		.lvts_sensor = {
+			{ .dt_id = MT6789_AP_LITTLE_CPU0,
+			  .cal_offsets = { 0x04, 0x05 } },
+			{ .dt_id = MT6789_AP_LITTLE_CPU1,
+			  .cal_offsets = { 0x06, 0x07 } },
+			{ .dt_id = MT6789_AP_LITTLE_CPU2,
+			  .cal_offsets = { 0x08, 0x09 } },
+			{ .dt_id = MT6789_AP_LITTLE_CPU3,
+			  .cal_offsets = { 0x0a, 0x0b } }
+		},
+		VALID_SENSOR_MAP(1, 1, 1, 1),
+		.offset = 0x0,
+	},
+	{
+		.lvts_sensor = {
+			{ .dt_id = MT6789_AP_LITTLE_CPU4,
+			  .cal_offsets = { 0x0c, 0x0d } },
+			{ .dt_id = MT6789_AP_LITTLE_CPU5,
+			  .cal_offsets = { 0x0e, 0x0f } },
+			{ .dt_id = MT6789_AP_BIG_CPU0,
+			  .cal_offsets = { 0x10, 0x11 } },
+			{ .dt_id = MT6789_AP_BIG_CPU1,
+			  .cal_offsets = { 0x12, 0x13 } }
+		},
+		VALID_SENSOR_MAP(1, 1, 1, 1),
+		.offset = 0x100,
+	},
+	{
+		.lvts_sensor = {
+			{ .dt_id = MT6789_AP_GPU0,
+			  .cal_offsets = { 0x14, 0x15 } },
+			{ .dt_id = MT6789_AP_GPU1,
+			  .cal_offsets = { 0x16, 0x17 } }
+		},
+		VALID_SENSOR_MAP(1, 1, 0, 0),
+		.offset = 0x200,
+	}
+};
+
 /*
  * The MT8186 calibration data is stored as packed 3-byte little-endian
  * values using a weird layout that makes sense only when viewed as a 32-bit
@@ -1741,6 +1785,16 @@ static const struct lvts_ctrl_data mt8195_lvts_ap_data_ctrl[] = {
 	}
 };
 
+static const struct lvts_data mt6789_lvts_ap_data = {
+	.lvts_ctrl	= mt6789_lvts_ap_data_ctrl,
+	.num_lvts_ctrl	= ARRAY_SIZE(mt6789_lvts_ap_data_ctrl),
+	.temp_factor	= LVTS_COEFF_A_MT8195,
+	.temp_offset	= LVTS_COEFF_B_MT8195,
+	.gt_calib_bit_offset = 24,
+	.def_calibration = 35000,
+	.num_cal_offsets = 2,
+};
+
 static const struct lvts_data mt7988_lvts_ap_data = {
 	.lvts_ctrl	= mt7988_lvts_ap_data_ctrl,
 	.num_lvts_ctrl	= ARRAY_SIZE(mt7988_lvts_ap_data_ctrl),
@@ -1821,6 +1875,7 @@ static const struct lvts_data mt8195_lvts_ap_data = {
 };
 
 static const struct of_device_id lvts_of_match[] = {
+	{ .compatible = "mediatek,mt6789-lvts-ap", .data = &mt6789_lvts_ap_data },
 	{ .compatible = "mediatek,mt7988-lvts-ap", .data = &mt7988_lvts_ap_data },
 	{ .compatible = "mediatek,mt8186-lvts", .data = &mt8186_lvts_data },
 	{ .compatible = "mediatek,mt8188-lvts-mcu", .data = &mt8188_lvts_mcu_data },
