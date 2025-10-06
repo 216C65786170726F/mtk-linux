@@ -1,0 +1,30 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2025, Gabriel Gonzales <216C65786170726F@proton.me>
+ */
+
+/dts-v1/;
+
+/ {
+	linux,initrd-start = <0x50000000>;
+	linux,initrd-end = <0x1100000>;
+
+	chassis-type = "handset";
+	compatible = "tecno,lg8n", "mediatek,mt6789";
+	model = "Tecno Pova 4 Pro";
+
+	chosen {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		simplefb: framebuffer@7d9b0000 {
+			compatible = "simple-framebuffer";
+			reg = <0x0 0x7d9b0000 0x0 ((1080 + 8) * 2400 * 4)>;
+			width = <1080>;
+			height = <2400>;
+			stride = <((1080 + 8) * 4)>;
+			format = "a8r8g8b8";
+		};
+	};
+};
